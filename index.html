@@ -1067,7 +1067,15 @@
           const targetWord = words.find(w => w.direction === direction && w.num === clue.num);
           if (targetWord && targetWord.cells.length > 0) {
             currentDirection = direction;
-            focusCell(targetWord.cells[0][0], targetWord.cells[0][1]);
+            focusCell(targetWord.cells[0][0], targetWord.cells[0][1], true);
+
+            // On mobile, smoothly bring the active clue bar & grid into view
+            if (window.innerWidth <= 992) {
+              const activeClueBar = document.getElementById("active-clue-bar");
+              if (activeClueBar) {
+                activeClueBar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }
           }
         });
 
@@ -1210,7 +1218,7 @@
       }
     }
 
-    function focusCell(r, c) {
+    function focusCell(r, c, shouldFocusInput = true) {
       if (r < 0 || r >= rows || c < 0 || c >= cols || crosswordPattern[r][c] === '#') return;
 
       currentCell = [r, c];
@@ -1226,10 +1234,14 @@
       highlightActiveState(r, c);
 
       const cell = cellMap[`${r},${c}`];
-      if (cell) {
+      if (cell && shouldFocusInput) {
         const inp = cell.querySelector("input");
         if (inp && document.activeElement !== inp) {
-          inp.focus();
+          try {
+            inp.focus({ preventScroll: true });
+          } catch (e) {
+            inp.focus();
+          }
           inp.select();
         }
       }
@@ -1238,7 +1250,7 @@
     function navigateGrid(nextR, nextC) {
       if (nextR >= 0 && nextR < rows && nextC >= 0 && nextC < cols) {
         if (crosswordPattern[nextR][nextC] !== '#') {
-          focusCell(nextR, nextC);
+          focusCell(nextR, nextC, true);
         }
       }
     }
@@ -1252,7 +1264,7 @@
 
       if (nextIdx >= 0 && nextIdx < curWord.cells.length) {
         const [nr, nc] = curWord.cells[nextIdx];
-        focusCell(nr, nc);
+        focusCell(nr, nc, true);
         if (clearOnBack) {
           const nextCell = cellMap[`${nr},${nc}`];
           if (nextCell) {
@@ -1297,11 +1309,20 @@
         activeClueBadge.textContent = `${activeWord.direction.toUpperCase()} ${activeWord.num}`;
         activeClueText.textContent = activeWord.clue;
 
-        // Highlight in Clues list and scroll into view smoothly
+        // Highlight in Clues list and scroll ONLY within the internal clues container (never scroll window/body)
         const clueElem = document.getElementById(`clue-item-${activeWord.direction}-${activeWord.num}`);
         if (clueElem) {
           clueElem.classList.add("active");
-          clueElem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          const cluesContainer = document.getElementById("clues");
+          if (cluesContainer) {
+            const containerRect = cluesContainer.getBoundingClientRect();
+            const elemRect = clueElem.getBoundingClientRect();
+            const scrollOffset = (elemRect.top - containerRect.top) + cluesContainer.scrollTop;
+            cluesContainer.scrollTo({
+              top: Math.max(0, scrollOffset - 20),
+              behavior: 'smooth'
+            });
+          }
         }
       }
     }
@@ -1460,10 +1481,10 @@
       }
     });
 
-    // Focus initial cell on load
+    // Initialize first clue on load without opening keyboard or scrolling page
     const firstWord = words[0];
     if (firstWord && firstWord.cells.length > 0) {
-      focusCell(firstWord.cells[0][0], firstWord.cells[0][1]);
+      focusCell(firstWord.cells[0][0], firstWord.cells[0][1], false);
     }
   </script>
 </body>
