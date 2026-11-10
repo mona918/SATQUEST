@@ -2,153 +2,852 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SATQUEST: Crossword Challenge</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SATQUEST: Crossword Challenge • Parikrama Club</title>
+
+  <!-- Google Fonts for sleek sci-fi / mission control aesthetic -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 
   <style>
+    :root {
+      --bg-space: #070a13;
+      --bg-panel: rgba(14, 21, 37, 0.78);
+      --bg-panel-border: rgba(0, 242, 254, 0.18);
+      --accent-cyan: #00f2fe;
+      --accent-violet: #7f00ff;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-amber: #f59e0b;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --cell-size: clamp(26px, 6.6vw, 42px);
+      --cell-font: clamp(14px, 3.4vw, 19px);
+      --num-font: clamp(8px, 1.8vw, 10px);
+      --border-radius: 14px;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      -webkit-tap-highlight-color: transparent;
     }
+
     body {
-      font-family: system-ui, sans-serif;
-      background-color: #f5f7fa;
+      font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-space);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(0, 242, 254, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(127, 0, 255, 0.09) 0%, transparent 45%),
+        linear-gradient(to bottom, #070a13, #0b1120);
+      min-height: 100vh;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Space Dust & Grid Overlay */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: 
+        radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+        linear-gradient(rgba(0, 242, 254, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 242, 254, 0.03) 1px, transparent 1px);
+      background-size: 80px 80px, 40px 40px, 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Top HUD / Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(7, 10, 19, 0.85);
+      border-bottom: 1px solid var(--bg-panel-border);
+      padding: 0.75rem 1.25rem;
+    }
+
+    .hud-container {
+      max-width: 1240px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .satellite-icon-box {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.2), rgba(127, 0, 255, 0.25));
+      border: 1px solid rgba(0, 242, 254, 0.4);
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      color: #222;
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.25);
     }
-    .container {
-      width: 100%;
-      max-width: 450px;
-      margin: 1rem;
+
+    .brand-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-    .card {
-      background: white;
-      border-radius: 10px;
-      padding: 2rem;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+
+    .brand-title span.highlight {
+      background: linear-gradient(90deg, #00f2fe, #4facfe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
-    h1, h2, h3 {
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-    .btn {
-      width: 100%;
-      padding: 0.8rem;
-      border: none;
-      border-radius: 6px;
+
+    .badge-club {
+      font-size: 0.7rem;
       font-weight: 600;
-      cursor: pointer;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      background: rgba(127, 0, 255, 0.25);
+      color: #c4b5fd;
+      border: 1px solid rgba(167, 139, 250, 0.35);
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
     }
-    .btn-primary {
-      background-color: #007bff;
-      color: white;
+
+    .hud-metrics {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
     }
-    .btn-primary:hover {
-      background-color: #0056b3;
+
+    .metric-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.85rem;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
     }
-    #crossword-container {
+
+    .metric-pill .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 8px var(--accent-cyan);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .timer-val {
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+
+    .progress-bar-wrap {
+      width: 120px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-left: 0.25rem;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-violet));
+      transition: width 0.3s ease;
+    }
+
+    /* Main Content Layout */
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 1240px;
+      margin: 1.25rem auto;
+      padding: 0 1rem;
+      z-index: 1;
+    }
+
+    /* Active Clue Banner */
+    .active-clue-bar {
+      background: linear-gradient(90deg, rgba(14, 23, 42, 0.95), rgba(15, 27, 54, 0.95));
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      border-left: 4px solid var(--accent-cyan);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 15px rgba(0, 242, 254, 0.1);
+      transition: all 0.25s ease;
+    }
+
+    .clue-badge {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      background: var(--accent-cyan);
+      color: #070a13;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .clue-text {
+      font-size: 0.95rem;
+      color: #e2e8f0;
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    /* Grid + Clues Split Layout */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 1fr 390px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 992px) {
+      .workspace-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Crossword Board Panel */
+    .board-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--bg-panel-border);
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
       display: flex;
       flex-direction: column;
       align-items: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     }
+
+    .board-header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.75rem;
+    }
+
+    .board-header h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sector-badge {
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+    }
+
+    .grid-viewport {
+      width: 100%;
+      overflow-x: auto;
+      display: flex;
+      justify-content: center;
+      padding: 0.5rem 0;
+      /* Custom thin scrollbar */
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent-cyan) rgba(255, 255, 255, 0.05);
+    }
+
+    /* Crossword Table */
     #crossword-grid {
-      border-collapse: collapse;
-      margin-bottom: 1rem;
+      border-collapse: separate;
+      border-spacing: 3px;
+      margin: 0 auto;
+      user-select: none;
     }
+
     #crossword-grid td {
-      width: 45px;
-      height: 45px;
-      border: 1px solid #444;
-      text-align: center;
+      width: var(--cell-size);
+      height: var(--cell-size);
+      min-width: var(--cell-size);
+      min-height: var(--cell-size);
+      border-radius: 6px;
       position: relative;
+      padding: 0;
+      background: rgba(18, 26, 47, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
     }
+
+    #crossword-grid td.blank {
+      background: #040710;
+      border: 1px solid rgba(255, 255, 255, 0.02);
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+    }
+
+    #crossword-grid td.active-word {
+      background: rgba(0, 242, 254, 0.12) !important;
+      border-color: rgba(0, 242, 254, 0.45) !important;
+    }
+
+    #crossword-grid td.active-cell {
+      background: rgba(0, 242, 254, 0.28) !important;
+      border-color: #00f2fe !important;
+      box-shadow: 0 0 14px rgba(0, 242, 254, 0.6) !important;
+      z-index: 3;
+    }
+
+    #crossword-grid td.correct {
+      background: rgba(16, 185, 129, 0.25) !important;
+      border-color: #10b981 !important;
+    }
+
+    #crossword-grid td.incorrect {
+      background: rgba(239, 68, 68, 0.28) !important;
+      border-color: #ef4444 !important;
+    }
+
     #crossword-grid input {
       width: 100%;
       height: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
       text-transform: uppercase;
       text-align: center;
-      border: none;
-      font-weight: 600;
-      font-size: 10px;
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      font-weight: 700;
+      font-size: var(--cell-font);
+      color: #ffffff;
+      caret-color: var(--accent-cyan);
+      cursor: pointer;
     }
-    #crossword-grid .blank {
-      background-color: #000;
+
+    #crossword-grid td.correct input {
+      color: #a7f3d0;
     }
+
+    #crossword-grid td.incorrect input {
+      color: #fca5a5;
+    }
+
     #crossword-grid .clue-number {
       position: absolute;
       top: 2px;
-      left: 2px;
-      font-size: 10px;
-      font-weight: bold;
-      color: #007bff;
+      left: 3px;
+      font-size: var(--num-font);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      pointer-events: none;
+      line-height: 1;
+      opacity: 0.9;
     }
-    #clues {
-      text-align: left;
+
+    /* Action Controls */
+    .controls-bar {
+      width: 100%;
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+
+    .btn {
+      padding: 0.85rem 1.25rem;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+      color: #050811;
+      box-shadow: 0 4px 15px rgba(0, 242, 254, 0.35);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #38f9d7 0%, #43e97b 100%);
+      box-shadow: 0 6px 20px rgba(67, 233, 123, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+    }
+
+    /* Result Container */
+    #result-container {
+      width: 100%;
+      margin-top: 1.25rem;
+    }
+
+    .result-box {
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-box.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #fca5a5;
+      font-size: 0.95rem;
+    }
+
+    .result-box.success {
+      background: linear-gradient(145deg, rgba(16, 185, 129, 0.15), rgba(6, 78, 59, 0.3));
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.25);
+    }
+
+    .success-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #34d399;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .coordinate-box {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px dashed rgba(16, 185, 129, 0.6);
+      border-radius: 8px;
+      padding: 0.85rem;
+      margin: 0.75rem 0;
+    }
+
+    .coordinate-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #94a3b8;
+      margin-bottom: 0.35rem;
+    }
+
+    .coordinate {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #a7f3d0;
+      word-break: break-all;
+    }
+
+    .coord-actions {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: center;
+      margin-top: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-action {
+      padding: 0.55rem 1rem;
+      font-size: 0.85rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-copy {
+      background: rgba(16, 185, 129, 0.25);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-copy:hover {
+      background: rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-maps {
+      background: rgba(0, 242, 254, 0.2);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(0, 242, 254, 0.4);
+    }
+
+    .btn-maps:hover {
+      background: rgba(0, 242, 254, 0.35);
+    }
+
+    /* Clues Panel */
+    .clues-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--bg-panel-border);
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      max-height: 680px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .clues-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.75rem;
       margin-bottom: 1rem;
     }
-    #clues ul {
-      margin-left: 1rem;
+
+    .clues-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-    .result-box {
-      margin-top: 1.5rem;
-      padding: 1rem;
+
+    .clues-scroll-area {
+      overflow-y: auto;
+      padding-right: 0.5rem;
+      flex: 1;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 242, 254, 0.4) rgba(255, 255, 255, 0.05);
+    }
+
+    .clue-group-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent-cyan);
+      margin: 1rem 0 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .clue-group-title:first-child {
+      margin-top: 0;
+    }
+
+    .clue-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .clue-item {
+      background: rgba(18, 26, 47, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 8px;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.88rem;
+      line-height: 1.45;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .clue-item:hover {
+      background: rgba(0, 242, 254, 0.08);
+      border-color: rgba(0, 242, 254, 0.25);
+      color: #fff;
+    }
+
+    .clue-item.active {
+      background: rgba(0, 242, 254, 0.15);
+      border-color: var(--accent-cyan);
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(0, 242, 254, 0.2);
+    }
+
+    .clue-item.solved {
+      opacity: 0.65;
+      text-decoration: line-through;
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .clue-item strong {
+      color: var(--accent-cyan);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    /* Footer instructions */
+    footer {
+      max-width: 1240px;
+      margin: 1rem auto 2rem auto;
+      padding: 0 1rem;
       text-align: center;
-      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      z-index: 1;
     }
-    .success {
-      background-color: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-    .error {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-    .coordinate {
-      font-size: 1.2rem;
+
+    .keyboard-hints {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.25rem;
+      flex-wrap: wrap;
       margin-top: 0.5rem;
-      font-family: 'Courier New', monospace;
-      background-color: #fff3cd;
-      padding: 0.5rem;
-      border-radius: 6px;
-      border: 2px dashed #856404;
+    }
+
+    .key-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 0.2rem 0.45rem;
+      border-radius: 5px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+    }
+
+    /* Responsive Mobile adjustments */
+    @media (max-width: 600px) {
+      header {
+        padding: 0.6rem 0.8rem;
+      }
+      .brand-title {
+        font-size: 1rem;
+      }
+      .badge-club {
+        display: none;
+      }
+      .hud-metrics {
+        gap: 0.5rem;
+      }
+      .progress-bar-wrap {
+        width: 60px;
+      }
+      .board-panel {
+        padding: 1rem 0.6rem;
+      }
+      .clues-panel {
+        padding: 1rem;
+        max-height: 480px;
+      }
+      .keyboard-hints {
+        display: none;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <h2>SATQUEST: Crossword Challenge</h2>
-      <p style="text-align:center;margin-bottom:1rem;">Solve the riddles to unlock your coordinate!</p>
 
-      <div id="crossword-container">
-        <table id="crossword-grid"></table>
-      
-        <div id="clues">
-          <h3>Across</h3>
-          <ul id="clues-across"></ul>
-          <h3>Down</h3>
-          <ul id="clues-down"></ul>
-          <div id="clues-up-section" style="display:none;">
-            <h3>Up</h3>
-            <ul id="clues-up"></ul>
+  <!-- Top Mission HUD -->
+  <header>
+    <div class="hud-container">
+      <div class="brand-section">
+        <div class="satellite-icon-box">
+          <!-- Satellite SVG Icon -->
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 7 9 3 5 7l4 4"></path>
+            <path d="m17 11 4 4-4 4-4-4"></path>
+            <path d="m8 12 4 4 6-6-4-4Z"></path>
+            <path d="m16 8 3-3"></path>
+            <path d="M9 21a6 6 0 0 0-6-6"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">
+            <span>PARIKRAMA</span>
+            <span class="highlight">SATQUEST</span>
+          </div>
+          <span class="badge-club">Space & Tech Club</span>
+        </div>
+      </div>
+
+      <div class="hud-metrics">
+        <div class="metric-pill">
+          <div class="dot"></div>
+          <span>TIME:</span>
+          <span id="mission-timer" class="timer-val">00:00</span>
+        </div>
+
+        <div class="metric-pill">
+          <span>PROGRESS:</span>
+          <span id="progress-text" class="timer-val">0%</span>
+          <div class="progress-bar-wrap">
+            <div id="progress-bar-fill" class="progress-bar-fill"></div>
           </div>
         </div>
-      
-        <button id="check-crossword" class="btn btn-primary">Check Answers</button>
-        <div id="result-container"></div>
       </div>
     </div>
-  </div>
+  </header>
+
+  <main>
+    <!-- Active Clue Prominent Ribbon -->
+    <div id="active-clue-bar" class="active-clue-bar">
+      <span id="active-clue-badge" class="clue-badge">SELECT A CELL</span>
+      <span id="active-clue-text" class="clue-text">Tap any letter cell or clue to begin decryption.</span>
+    </div>
+
+    <!-- Workspace: Crossword Grid + Clues Panel -->
+    <div class="workspace-grid">
+      <!-- Crossword Board Section -->
+      <section class="board-panel">
+        <div class="board-header">
+          <h2>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+              <path d="M3 9h18"></path>
+              <path d="M9 21V9"></path>
+            </svg>
+            Crossword Matrix
+          </h2>
+          <span id="sector-indicator" class="sector-badge">Sector: Decrypt-01</span>
+        </div>
+
+        <div class="grid-viewport">
+          <table id="crossword-grid"></table>
+        </div>
+
+        <div class="controls-bar">
+          <button id="check-crossword" class="btn btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Verify Decryption
+          </button>
+          <button id="reset-puzzle" class="btn btn-secondary" title="Reset Grid">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div id="result-container"></div>
+      </section>
+
+      <!-- Mission Clues Sidebar Panel -->
+      <aside class="clues-panel">
+        <div class="clues-header">
+          <h3>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00f2fe" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 16v-4"></path>
+              <path d="M12 8h.01"></path>
+            </svg>
+            Mission Clues
+          </h3>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Tap clue to locate</span>
+        </div>
+
+        <div id="clues" class="clues-scroll-area">
+          <div class="clue-group-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+            Across
+          </div>
+          <ul id="clues-across" class="clue-list"></ul>
+
+          <div class="clue-group-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg>
+            Down
+          </div>
+          <ul id="clues-down" class="clue-list"></ul>
+
+          <div id="clues-up-section" style="display:none;">
+            <div class="clue-group-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg>
+              Up
+            </div>
+            <ul id="clues-up" class="clue-list"></ul>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer>
+    <div>PARIKRAMA • Technical & Space Club Challenge • Solve all riddles to decode campus coordinates</div>
+    <div class="keyboard-hints">
+      <span class="key-badge">Click</span> Toggle Across/Down
+      <span class="key-badge">Arrows</span> Move Cell
+      <span class="key-badge">Backspace</span> Erase & Move Back
+      <span class="key-badge">Enter</span> Check Decryption
+    </div>
+  </footer>
 
   <script>
-    // Four different crosswords with their coordinates
+    // PRESERVED ORIGINAL CROSSWORD DATA
     const crosswordSets = [
       {
         coordinate: "22.252569082240043, 84.90434822856787",
@@ -173,15 +872,15 @@
         ],
         clues: {
           across: [
-            { num: '2', clue: 'I have a mouth but never speak, a bed but never sleep. I wear no clothes but have a case & though I\'m small, I light the place. what am I ?' },
-            { num: '3', clue: 'I am a modern marvel, efficient and small I use no filament, yet I light up your hall. I come in all colours, a tiny, bright Spark, & use for less powers, saving you in the dark .what am I?' },
-            { num: '4', clue: 'I have no mass, but I can make things light. I push & pull with all my might. I power your world from morning till night who am I?' }
+            { num: '2', clue: "I have a mouth but never speak, a bed but never sleep. I wear no clothes but have a case & though I'm small, I light the place. what am I ?" },
+            { num: '3', clue: "I am a modern marvel, efficient and small I use no filament, yet I light up your hall. I come in all colours, a tiny, bright Spark, & use for less powers, saving you in the dark .what am I?" },
+            { num: '4', clue: "I have no mass, but I can make things light. I push & pull with all my might. I power your world from morning till night who am I?" }
           ],
           down: [
-            { num: '1', clue: 'I have a job to do though , I never move a muscle. I restrict the flow in a silent static hustle. I heat up the line ,but I don\'t start the fire .' }
+            { num: '1', clue: "I have a job to do though , I never move a muscle. I restrict the flow in a silent static hustle. I heat up the line ,but I don't start the fire ." }
           ],
           up: [
-            { num: '5', clue: 'I am a tiny electronic one way gate, letting current pass, sealing fate. I prevent backflow,Simple & plain ' }
+            { num: '5', clue: "I am a tiny electronic one way gate, letting current pass, sealing fate. I prevent backflow,Simple & plain " }
           ]
         }
       },
@@ -263,67 +962,148 @@
       }
     ];
 
-    // Select random crossword
-    const selectedCrossword = crosswordSets[Math.floor(Math.random() * crosswordSets.length)];
+    // Session-persistent puzzle selection (prevents losing puzzle on refresh during treasure hunt)
+    let puzzleIndex = sessionStorage.getItem('satquest_puzzle_idx');
+    if (puzzleIndex === null || puzzleIndex >= crosswordSets.length) {
+      puzzleIndex = Math.floor(Math.random() * crosswordSets.length);
+      sessionStorage.setItem('satquest_puzzle_idx', puzzleIndex);
+    } else {
+      puzzleIndex = parseInt(puzzleIndex, 10);
+    }
+
+    const selectedCrossword = crosswordSets[puzzleIndex];
     const crosswordPattern = selectedCrossword.pattern;
     const clueNumbers = selectedCrossword.clueNumbers;
-  
-    const grid = document.getElementById("crossword-grid");
     const rows = crosswordPattern.length;
     const cols = crosswordPattern[0].length;
 
-    // Populate clues dynamically
+    // Update sector indicator
+    const sectorLabels = ["Sector Circuit-01", "Sector Orbit-02", "Sector Cosmos-03"];
+    document.getElementById("sector-indicator").textContent = sectorLabels[puzzleIndex] || `Sector Alpha-0${puzzleIndex + 1}`;
+
+    // DOM references
+    const grid = document.getElementById("crossword-grid");
     const cluesAcross = document.getElementById("clues-across");
     const cluesDown = document.getElementById("clues-down");
     const cluesUp = document.getElementById("clues-up");
     const cluesUpSection = document.getElementById("clues-up-section");
+    const checkBtn = document.getElementById("check-crossword");
+    const resetBtn = document.getElementById("reset-puzzle");
+    const resultContainer = document.getElementById("result-container");
+    const activeClueBadge = document.getElementById("active-clue-badge");
+    const activeClueText = document.getElementById("active-clue-text");
+    const timerDisplay = document.getElementById("mission-timer");
+    const progressText = document.getElementById("progress-text");
+    const progressBarFill = document.getElementById("progress-bar-fill");
 
-    selectedCrossword.clues.across.forEach(clue => {
-      const li = document.createElement("li");
-      li.innerHTML = `<strong>${clue.num}.</strong> ${clue.clue}`;
-      cluesAcross.appendChild(li);
-    });
+    // ==========================================
+    // BUILD WORD DICTIONARY & CELL CROSS-REFERENCES
+    // ==========================================
+    const words = [];
+    const cellMap = {}; // key: "r,c" => { element, acrossWord, downWord, upWord }
 
-    selectedCrossword.clues.down.forEach(clue => {
-      const li = document.createElement("li");
-      li.innerHTML = `<strong>${clue.num}.</strong> ${clue.clue}`;
-      cluesDown.appendChild(li);
-    });
+    function findClueCoordinates(num) {
+      const match = clueNumbers.find(item => item[2] === num);
+      return match ? [match[0], match[1]] : null;
+    }
 
-    if (selectedCrossword.clues.up.length > 0) {
-      cluesUpSection.style.display = 'block';
-      selectedCrossword.clues.up.forEach(clue => {
+    // Helper to extract words along direction
+    function registerWord(direction, clueObj) {
+      const start = findClueCoordinates(clueObj.num);
+      if (!start) return;
+
+      const [startR, startC] = start;
+      const wordCells = [];
+
+      if (direction === 'across') {
+        let c = startC;
+        while (c < cols && crosswordPattern[startR][c] !== '#') {
+          wordCells.push([startR, c]);
+          c++;
+        }
+      } else if (direction === 'down') {
+        let r = startR;
+        while (r < rows && crosswordPattern[r][startC] !== '#') {
+          wordCells.push([r, startC]);
+          r++;
+        }
+      } else if (direction === 'up') {
+        // Upwards direction (e.g. DIODE in Set 1)
+        let r = startR;
+        while (r >= 0 && crosswordPattern[r][startC] !== '#') {
+          wordCells.push([r, startC]);
+          r--;
+        }
+      }
+
+      const word = {
+        id: `${direction}-${clueObj.num}`,
+        num: clueObj.num,
+        direction: direction,
+        clue: clueObj.clue,
+        cells: wordCells
+      };
+
+      words.push(word);
+      return word;
+    }
+
+    // Register all words for this puzzle
+    selectedCrossword.clues.across.forEach(c => registerWord('across', c));
+    selectedCrossword.clues.down.forEach(c => registerWord('down', c));
+    if (selectedCrossword.clues.up) {
+      selectedCrossword.clues.up.forEach(c => registerWord('up', c));
+    }
+
+    // Render Clues with interactive attributes
+    function renderClueList(clueList, container, direction) {
+      clueList.forEach(clue => {
         const li = document.createElement("li");
-        li.innerHTML = `<strong>${clue.num}.</strong> ${clue.clue}`;
-        cluesUp.appendChild(li);
+        li.className = "clue-item";
+        li.id = `clue-item-${direction}-${clue.num}`;
+        li.innerHTML = `<strong>${clue.num}.</strong> <span>${clue.clue}</span>`;
+        
+        li.addEventListener("click", () => {
+          const targetWord = words.find(w => w.direction === direction && w.num === clue.num);
+          if (targetWord && targetWord.cells.length > 0) {
+            currentDirection = direction;
+            focusCell(targetWord.cells[0][0], targetWord.cells[0][1]);
+          }
+        });
+
+        container.appendChild(li);
       });
     }
-  
-    // Build grid
+
+    renderClueList(selectedCrossword.clues.across, cluesAcross, 'across');
+    renderClueList(selectedCrossword.clues.down, cluesDown, 'down');
+
+    if (selectedCrossword.clues.up && selectedCrossword.clues.up.length > 0) {
+      cluesUpSection.style.display = 'block';
+      renderClueList(selectedCrossword.clues.up, cluesUp, 'up');
+    }
+
+    // State Variables
+    let currentCell = null; // [r, c]
+    let currentDirection = 'across'; // 'across' | 'down' | 'up'
+
+    // Load saved inputs from sessionStorage
+    const savedInputs = JSON.parse(sessionStorage.getItem(`satquest_inputs_${puzzleIndex}`) || '{}');
+
+    // ==========================================
+    // BUILD INTERACTIVE CROSSWORD TABLE
+    // ==========================================
     for (let r = 0; r < rows; r++) {
       const row = document.createElement("tr");
       for (let c = 0; c < cols; c++) {
         const cell = document.createElement("td");
+        cell.dataset.row = r;
+        cell.dataset.col = c;
+
         if (crosswordPattern[r][c] === '#') {
           cell.classList.add("blank");
         } else {
-          const input = document.createElement("input");
-          input.maxLength = 1;
-          input.dataset.row = r;
-          input.dataset.col = c;
-          
-          // Auto-advance to next cell
-          input.addEventListener('input', (e) => {
-            if (e.target.value) {
-              const allInputs = Array.from(grid.querySelectorAll('input'));
-              const currentIndex = allInputs.indexOf(e.target);
-              if (currentIndex < allInputs.length - 1) {
-                allInputs[currentIndex + 1].focus();
-              }
-            }
-          });
-
-          // Add clue number if exists
+          // Clue number in cell corner
           const clueNum = clueNumbers.find(cn => cn[0] === r && cn[1] === c);
           if (clueNum) {
             const numSpan = document.createElement("span");
@@ -331,69 +1111,360 @@
             numSpan.textContent = clueNum[2];
             cell.appendChild(numSpan);
           }
-          
-          // Backspace navigation
-          input.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace' && !e.target.value) {
-              const allInputs = Array.from(grid.querySelectorAll('input'));
-              const currentIndex = allInputs.indexOf(e.target);
-              if (currentIndex > 0) {
-                allInputs[currentIndex - 1].focus();
-              }
+
+          const input = document.createElement("input");
+          input.maxLength = 1;
+          input.autocomplete = "off";
+          input.autocorrect = "off";
+          input.spellcheck = false;
+          input.dataset.row = r;
+          input.dataset.col = c;
+
+          // Restore saved value
+          const savedVal = savedInputs[`${r},${c}`];
+          if (savedVal) input.value = savedVal;
+
+          // Cell Selection & Direction Toggle
+          cell.addEventListener("click", () => {
+            if (currentCell && currentCell[0] === r && currentCell[1] === c) {
+              // Clicked same cell again: toggle direction between available words for this cell
+              toggleDirection(r, c);
+            } else {
+              focusCell(r, c);
             }
           });
-          
+
+          // Typing Input Handler (Smart Advance)
+          input.addEventListener("input", (e) => {
+            const val = e.target.value.toUpperCase();
+            e.target.value = val;
+
+            // Clear red/green validation colors on edit
+            cell.classList.remove('correct', 'incorrect');
+
+            // Save to sessionStorage
+            savedInputs[`${r},${c}`] = val;
+            sessionStorage.setItem(`satquest_inputs_${puzzleIndex}`, JSON.stringify(savedInputs));
+            updateProgress();
+
+            if (val) {
+              // Advance to next cell in current word
+              advanceFocus(r, c, 1);
+            }
+          });
+
+          // Keyboard Navigation
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Backspace") {
+              cell.classList.remove('correct', 'incorrect');
+              if (!input.value) {
+                // If cell already empty, jump to previous cell in current word
+                e.preventDefault();
+                advanceFocus(r, c, -1, true);
+              } else {
+                input.value = "";
+                delete savedInputs[`${r},${c}`];
+                sessionStorage.setItem(`satquest_inputs_${puzzleIndex}`, JSON.stringify(savedInputs));
+                updateProgress();
+              }
+            } else if (e.key === "ArrowRight") {
+              e.preventDefault();
+              navigateGrid(r, c + 1);
+            } else if (e.key === "ArrowLeft") {
+              e.preventDefault();
+              navigateGrid(r, c - 1);
+            } else if (e.key === "ArrowDown") {
+              e.preventDefault();
+              navigateGrid(r + 1, c);
+            } else if (e.key === "ArrowUp") {
+              e.preventDefault();
+              navigateGrid(r - 1, c);
+            } else if (e.key === "Enter") {
+              checkBtn.click();
+            }
+          });
+
           cell.appendChild(input);
         }
+
+        cellMap[`${r},${c}`] = cell;
         row.appendChild(cell);
       }
       grid.appendChild(row);
     }
-  
-    const checkBtn = document.getElementById("check-crossword");
-    const resultContainer = document.getElementById("result-container");
-  
-    checkBtn.addEventListener("click", () => {
-      const inputs = grid.querySelectorAll("input");
-      let correct = 0;
-      let total = 0;
-  
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          if (crosswordPattern[r][c] !== '#') {
-            total++;
-            const input = grid.rows[r].cells[c].querySelector("input");
-            const val = input.value.toUpperCase();
-            if (val === crosswordPattern[r][c]) {
-              input.style.backgroundColor = "#c8e6c9"; // green
-              correct++;
-            } else {
-              input.style.backgroundColor = "#ffcdd2"; // red
+
+    // ==========================================
+    // NAVIGATION & FOCUS LOGIC
+    // ==========================================
+    function getWordsForCell(r, c) {
+      return words.filter(w => w.cells.some(pos => pos[0] === r && pos[1] === c));
+    }
+
+    function toggleDirection(r, c) {
+      const cellWords = getWordsForCell(r, c);
+      if (cellWords.length > 1) {
+        const curIdx = cellWords.findIndex(w => w.direction === currentDirection);
+        const nextWord = cellWords[(curIdx + 1) % cellWords.length];
+        currentDirection = nextWord.direction;
+        highlightActiveState(r, c);
+      }
+    }
+
+    function focusCell(r, c) {
+      if (r < 0 || r >= rows || c < 0 || c >= cols || crosswordPattern[r][c] === '#') return;
+
+      currentCell = [r, c];
+      const cellWords = getWordsForCell(r, c);
+      
+      // If cell doesn't have current direction, switch to its available direction
+      if (!cellWords.some(w => w.direction === currentDirection)) {
+        if (cellWords.length > 0) {
+          currentDirection = cellWords[0].direction;
+        }
+      }
+
+      highlightActiveState(r, c);
+
+      const cell = cellMap[`${r},${c}`];
+      if (cell) {
+        const inp = cell.querySelector("input");
+        if (inp && document.activeElement !== inp) {
+          inp.focus();
+          inp.select();
+        }
+      }
+    }
+
+    function navigateGrid(nextR, nextC) {
+      if (nextR >= 0 && nextR < rows && nextC >= 0 && nextC < cols) {
+        if (crosswordPattern[nextR][nextC] !== '#') {
+          focusCell(nextR, nextC);
+        }
+      }
+    }
+
+    function advanceFocus(r, c, offset, clearOnBack = false) {
+      const curWord = words.find(w => w.direction === currentDirection && w.cells.some(pos => pos[0] === r && pos[1] === c));
+      if (!curWord) return;
+
+      const idx = curWord.cells.findIndex(pos => pos[0] === r && pos[1] === c);
+      const nextIdx = idx + offset;
+
+      if (nextIdx >= 0 && nextIdx < curWord.cells.length) {
+        const [nr, nc] = curWord.cells[nextIdx];
+        focusCell(nr, nc);
+        if (clearOnBack) {
+          const nextCell = cellMap[`${nr},${nc}`];
+          if (nextCell) {
+            const nextInp = nextCell.querySelector("input");
+            if (nextInp) {
+              nextInp.value = "";
+              delete savedInputs[`${nr},${nc}`];
+              sessionStorage.setItem(`satquest_inputs_${puzzleIndex}`, JSON.stringify(savedInputs));
+              updateProgress();
             }
           }
         }
       }
-  
+    }
+
+    function highlightActiveState(r, c) {
+      // Clear previous word/cell highlights
+      grid.querySelectorAll("td").forEach(td => {
+        td.classList.remove("active-word", "active-cell");
+      });
+      document.querySelectorAll(".clue-item").forEach(item => {
+        item.classList.remove("active");
+      });
+
+      const cell = cellMap[`${r},${c}`];
+      if (cell) cell.classList.add("active-cell");
+
+      // Find active word
+      const activeWord = words.find(w => w.direction === currentDirection && w.cells.some(pos => pos[0] === r && pos[1] === c)) 
+        || getWordsForCell(r, c)[0];
+
+      if (activeWord) {
+        currentDirection = activeWord.direction;
+
+        // Highlight cells of active word
+        activeWord.cells.forEach(([wr, wc]) => {
+          const wCell = cellMap[`${wr},${wc}`];
+          if (wCell) wCell.classList.add("active-word");
+        });
+
+        // Update Active Clue Ribbon
+        activeClueBadge.textContent = `${activeWord.direction.toUpperCase()} ${activeWord.num}`;
+        activeClueText.textContent = activeWord.clue;
+
+        // Highlight in Clues list and scroll into view smoothly
+        const clueElem = document.getElementById(`clue-item-${activeWord.direction}-${activeWord.num}`);
+        if (clueElem) {
+          clueElem.classList.add("active");
+          clueElem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    }
+
+    // ==========================================
+    // PROGRESS & TIMER HUD
+    // ==========================================
+    function updateProgress() {
+      let filled = 0;
+      let total = 0;
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (crosswordPattern[r][c] !== '#') {
+            total++;
+            const inp = cellMap[`${r},${c}`].querySelector("input");
+            if (inp && inp.value.trim()) filled++;
+          }
+        }
+      }
+
+      const percent = total > 0 ? Math.round((filled / total) * 100) : 0;
+      progressText.textContent = `${percent}% (${filled}/${total})`;
+      progressBarFill.style.width = `${percent}%`;
+
+      // Update solved clue line-throughs
+      words.forEach(w => {
+        const isFilled = w.cells.every(([wr, wc]) => {
+          const inp = cellMap[`${wr},${wc}`].querySelector("input");
+          return inp && inp.value.trim() !== "";
+        });
+        const clueElem = document.getElementById(`clue-item-${w.direction}-${w.num}`);
+        if (clueElem) {
+          if (isFilled) clueElem.classList.add("solved");
+          else clueElem.classList.remove("solved");
+        }
+      });
+    }
+
+    // Mission Timer
+    let startTime = sessionStorage.getItem('satquest_timer_start');
+    if (!startTime) {
+      startTime = Date.now();
+      sessionStorage.setItem('satquest_timer_start', startTime);
+    } else {
+      startTime = parseInt(startTime, 10);
+    }
+
+    function updateTimer() {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+      const s = String(elapsed % 60).padStart(2, '0');
+      timerDisplay.textContent = `${m}:${s}`;
+    }
+    setInterval(updateTimer, 1000);
+    updateTimer();
+    updateProgress();
+
+    // ==========================================
+    // VERIFICATION & COORDINATE REVEAL
+    // ==========================================
+    checkBtn.addEventListener("click", () => {
+      let correct = 0;
+      let total = 0;
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (crosswordPattern[r][c] !== '#') {
+            total++;
+            const cell = cellMap[`${r},${c}`];
+            const input = cell.querySelector("input");
+            const val = input.value.toUpperCase();
+
+            cell.classList.remove('correct', 'incorrect');
+            if (val === crosswordPattern[r][c]) {
+              cell.classList.add('correct');
+              correct++;
+            } else {
+              cell.classList.add('incorrect');
+            }
+          }
+        }
+      }
+
       if (correct === total) {
-        // Use the coordinate for this specific crossword
         const coordinate = selectedCrossword.coordinate;
-        
+        const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(coordinate)}`;
+
         resultContainer.innerHTML = `
           <div class="result-box success">
-            <div>✅ Congratulations! Crossword Complete!</div>
-            <div style="margin-top: 1rem;">Your Coordinate:</div>
-            <div class="coordinate">${coordinate}</div>
+            <div class="success-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              MISSION DECRYPTED SUCCESSFULLY!
+            </div>
+            <div style="font-size: 0.9rem; color: #cbd5e1;">Target Coordinates Unlocked:</div>
+            
+            <div class="coordinate-box">
+              <div class="coordinate-label">GPS Waypoint Coordinates</div>
+              <div class="coordinate" id="coord-val">${coordinate}</div>
+            </div>
+
+            <div class="coord-actions">
+              <button id="copy-coord-btn" class="btn-action btn-copy">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+                  <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+                </svg>
+                <span id="copy-text">Copy Coordinates</span>
+              </button>
+
+              <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="btn-action btn-maps">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
+                  <line x1="9" x2="9" y1="3" y2="18"></line>
+                  <line x1="15" x2="15" y1="6" y2="21"></line>
+                </svg>
+                Open in Google Maps
+              </a>
+            </div>
           </div>
         `;
+
+        // Wire Copy Button
+        const copyBtn = document.getElementById("copy-coord-btn");
+        const copyText = document.getElementById("copy-text");
+        copyBtn.addEventListener("click", () => {
+          navigator.clipboard.writeText(coordinate).then(() => {
+            copyText.textContent = "Copied to Clipboard!";
+            setTimeout(() => {
+              copyText.textContent = "Copy Coordinates";
+            }, 2500);
+          });
+        });
+
+        // Auto-scroll to result on mobile
+        resultContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
       } else {
         resultContainer.innerHTML = `
           <div class="result-box error">
-            ❌ Some answers are incorrect. Try again!
+            <div style="font-weight: 700; margin-bottom: 0.25rem;">⚠️ Decryption Check Failed</div>
+            <div>${correct} of ${total} letters correct. Review red highlighted cells and try again!</div>
           </div>
         `;
       }
     });
+
+    // Reset Puzzle Handler
+    resetBtn.addEventListener("click", () => {
+      if (confirm("Reset current crossword entries?")) {
+        sessionStorage.removeItem(`satquest_inputs_${puzzleIndex}`);
+        location.reload();
+      }
+    });
+
+    // Focus initial cell on load
+    const firstWord = words[0];
+    if (firstWord && firstWord.cells.length > 0) {
+      focusCell(firstWord.cells[0][0], firstWord.cells[0][1]);
+    }
   </script>
 </body>
-
 </html>
